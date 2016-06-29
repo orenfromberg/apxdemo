@@ -52,6 +52,7 @@ char* loadFile(const char *filename) {
 	len = ifs.tellg();
 	ifs.seekg(0, std::ios::beg);
 	data = new char[len + 1];
+	memset(data, 0, len);
 	ifs.read(data, len);
 	data[len] = 0;
 	ifs.close();
@@ -327,13 +328,27 @@ int main (int argc, char **argv)
 	// load our shaders and compile them.. create a program and link it
 	GLuint glShaderV = glCreateShader(GL_VERTEX_SHADER);
 	GLuint glShaderF = glCreateShader(GL_FRAGMENT_SHADER);
-	const GLchar* vShaderSource = loadFile("skybox.vert");
-	const GLchar* fShaderSource = loadFile("skybox.frag");
+	const GLchar* vShaderSource = loadFile("skybox.vert.hlsl");
+	const GLchar* fShaderSource = loadFile("skybox.frag.hlsl");
 	glShaderSource(glShaderV, 1, &vShaderSource, NULL);
 	glShaderSource(glShaderF, 1, &fShaderSource, NULL);
-	delete [] vShaderSource;
-	delete [] fShaderSource;
 	glCompileShader(glShaderV);
+	delete[] vShaderSource;
+	delete[] fShaderSource;
+	GLint status;
+	glGetShaderiv(glShaderV, GL_COMPILE_STATUS, &status);
+
+	if (status == GL_FALSE)
+	{
+		GLint infoLogLength;
+		glGetShaderiv(glShaderV, GL_INFO_LOG_LENGTH, &infoLogLength);
+
+		GLchar* strInfoLog = new GLchar[infoLogLength + 1];
+		glGetShaderInfoLog(glShaderV, infoLogLength, NULL, strInfoLog);
+
+		fprintf(stderr, "Compilation error in shader %s: %s\n", "glShaderV", strInfoLog);
+		delete[] strInfoLog;
+	}
 	glCompileShader(glShaderF);
 	GLuint cubeMapProg = glCreateProgram();
 	glAttachShader(cubeMapProg, glShaderV);
@@ -349,8 +364,8 @@ int main (int argc, char **argv)
 	// load shaders for the keyboard geometry
 	glShaderV = glCreateShader (GL_VERTEX_SHADER);
 	glShaderF = glCreateShader (GL_FRAGMENT_SHADER);
-	const GLchar * mVSource = loadFile ("model.vert");
-	const GLchar * mFSource = loadFile ("model.frag");
+	const GLchar * mVSource = loadFile ("model.vert.hlsl");
+	const GLchar * mFSource = loadFile ("model.frag.hlsl");
 	glShaderSource(glShaderV, 1, &mVSource, NULL);
 	glShaderSource(glShaderF, 1, &mFSource, NULL);
 	delete [] mVSource;

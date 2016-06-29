@@ -19,4 +19,19 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="model.frag.hlsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="model.vert.hlsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="skybox.frag.hlsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="skybox.vert.hlsl">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>
