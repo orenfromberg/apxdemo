@@ -14,11 +14,23 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="media\skybox.flv" />
     <None Include="model.frag.hlsl" />
     <None Include="model.vert.hlsl" />
     <None Include="packages.config" />
     <None Include="skybox.frag.hlsl" />
     <None Include="skybox.vert.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="media\skybox.jpg" />
+    <Image Include="media\skybox_background.jpg" />
+    <Image Include="media\skybox_texture.jpg" />
+    <Image Include="media\xneg.png" />
+    <Image Include="media\xpos.png" />
+    <Image Include="media\yneg.png" />
+    <Image Include="media\ypos.png" />
+    <Image Include="media\zneg.png" />
+    <Image Include="media\zpos.png" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2EFC2D9F-41C7-48EB-99E4-254296DD2A8E}</ProjectGuid>

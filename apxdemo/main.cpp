@@ -42,6 +42,9 @@ bool g_keysdown_arr[KEYDOWN_ARRAY_SIZE];
 // global vector for text typed on keyboard
 std::vector<char> g_text;
 
+// cubemap texture
+GLuint cubemap_texture;
+
 // the following function was adapted from Keith Lantz
 // http://www.keithlantz.net/2011/10/rendering-a-skybox-using-a-cube-map-with-opengl-and-glsl/
 char* loadFile(const char *filename) {
@@ -282,41 +285,24 @@ void doSelection (int x, int y)
 	g_text.push_back((char)c);
 }
 
-// the main function
-int main (int argc, char **argv) 
+void Init()
 {
 	// init global array
 	memset(g_keysdown_arr, 0, sizeof(char)*KEYDOWN_ARRAY_SIZE);
 
 	// setup an opengl context
 	SDL_Init(SDL_INIT_EVERYTHING);
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE,     8);
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,   8);
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,    8);
-	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE,   8);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,  16);
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_Surface *screen = SDL_SetVideoMode(WIDTH, HEIGHT, 32, SDL_HWSURFACE | SDL_OPENGL);
-	SDL_WM_SetCaption ("Virtual Keyboard Demo for APX-Labs by Oren Fromberg", NULL);
+	SDL_WM_SetCaption("Virtual Keyboard Demo for APX-Labs by Oren Fromberg", NULL);
 
 	// initialize the extension wrangler
 	glewInit();
-
-	// for handling events
-	SDL_Event event;
-
-	// set up the cube map texture
-	SDL_Surface *xpos = IMG_Load("media/xpos.png");	
-	SDL_Surface *xneg = IMG_Load("media/xneg.png");
-	SDL_Surface *ypos = IMG_Load("media/ypos.png");	
-	SDL_Surface *yneg = IMG_Load("media/yneg.png");
-	SDL_Surface *zpos = IMG_Load("media/zpos.png");	
-	SDL_Surface *zneg = IMG_Load("media/zneg.png");
-	GLuint cubemap_texture;
-	setupCubeMap(cubemap_texture, xpos, xneg, ypos, yneg, zpos, zneg);
-	SDL_FreeSurface(xneg);	SDL_FreeSurface(xpos);
-	SDL_FreeSurface(yneg);	SDL_FreeSurface(ypos);
-	SDL_FreeSurface(zneg);	SDL_FreeSurface(zpos);
 
 	// set our viewport, clear color and depth, and enable depth testing
 	glViewport(0, 0, WIDTH, HEIGHT);
@@ -324,6 +310,47 @@ int main (int argc, char **argv)
 	glClearDepth(1.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
+}
+
+void SetupCubeMap()
+{
+	// set up the cube map texture
+	SDL_Surface *xpos = IMG_Load("media/xpos.png");
+	SDL_Surface *xneg = IMG_Load("media/xneg.png");
+	SDL_Surface *ypos = IMG_Load("media/ypos.png");
+	SDL_Surface *yneg = IMG_Load("media/yneg.png");
+	SDL_Surface *zpos = IMG_Load("media/zpos.png");
+	SDL_Surface *zneg = IMG_Load("media/zneg.png");
+	setupCubeMap(cubemap_texture, xpos, xneg, ypos, yneg, zpos, zneg);
+	SDL_FreeSurface(xneg);	SDL_FreeSurface(xpos);
+	SDL_FreeSurface(yneg);	SDL_FreeSurface(ypos);
+	SDL_FreeSurface(zneg);	SDL_FreeSurface(zpos);
+}
+
+void CheckShaderCompilation(GLuint shader)
+{
+	GLint status;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+
+	if (status == GL_FALSE)
+	{
+		GLint infoLogLength;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+
+		GLchar* strInfoLog = new GLchar[infoLogLength + 1];
+		glGetShaderInfoLog(shader, infoLogLength, NULL, strInfoLog);
+
+		fprintf(stderr, "Compilation error in shader %s: %s\n", "glShaderV", strInfoLog);
+		delete[] strInfoLog;
+	}
+}
+
+// the main function
+int main (int argc, char **argv) 
+{
+	Init();
+
+	SetupCubeMap();
 
 	// load our shaders and compile them.. create a program and link it
 	GLuint glShaderV = glCreateShader(GL_VERTEX_SHADER);
@@ -333,23 +360,12 @@ int main (int argc, char **argv)
 	glShaderSource(glShaderV, 1, &vShaderSource, NULL);
 	glShaderSource(glShaderF, 1, &fShaderSource, NULL);
 	glCompileShader(glShaderV);
+	CheckShaderCompilation(glShaderV);
+	glCompileShader(glShaderF);
+	CheckShaderCompilation(glShaderF);
 	delete[] vShaderSource;
 	delete[] fShaderSource;
-	GLint status;
-	glGetShaderiv(glShaderV, GL_COMPILE_STATUS, &status);
 
-	if (status == GL_FALSE)
-	{
-		GLint infoLogLength;
-		glGetShaderiv(glShaderV, GL_INFO_LOG_LENGTH, &infoLogLength);
-
-		GLchar* strInfoLog = new GLchar[infoLogLength + 1];
-		glGetShaderInfoLog(glShaderV, infoLogLength, NULL, strInfoLog);
-
-		fprintf(stderr, "Compilation error in shader %s: %s\n", "glShaderV", strInfoLog);
-		delete[] strInfoLog;
-	}
-	glCompileShader(glShaderF);
 	GLuint cubeMapProg = glCreateProgram();
 	glAttachShader(cubeMapProg, glShaderV);
 	glAttachShader(cubeMapProg, glShaderF);
@@ -371,7 +387,9 @@ int main (int argc, char **argv)
 	delete [] mVSource;
 	delete [] mFSource;
 	glCompileShader(glShaderV);
+	CheckShaderCompilation(glShaderV);
 	glCompileShader(glShaderF);
+	CheckShaderCompilation(glShaderF);
 	GLuint modelProg = glCreateProgram();
 	glAttachShader(modelProg, glShaderV);
 	glAttachShader(modelProg, glShaderF);
@@ -468,6 +486,9 @@ int main (int argc, char **argv)
 	bool mouse_down = false;
 	char * ch = NULL;
 	unsigned int num_ticks = 0;
+
+	// for handling events
+	SDL_Event event;
 
 	// the game loop
 	while(!done)

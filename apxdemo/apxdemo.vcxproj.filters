@@ -33,5 +33,37 @@
     <None Include="skybox.vert.hlsl">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="media\skybox.flv">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="media\skybox.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="media\skybox_background.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="media\skybox_texture.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="media\xneg.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="media\xpos.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="media\yneg.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="media\ypos.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="media\zneg.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="media\zpos.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
